@@ -1,0 +1,14 @@
+[project]
+name = "revenue-leakage-agent"
+version = "0.1.0"
+description = "AI-powered Streamlit dashboard for identifying revenue leakage"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "groq>=0.31.0",
+    "pandas>=2.2.0",
+    "plotly>=6.0.0",
+    "pydantic>=2.10.0",
+    "streamlit>=1.46.0",
+]
+
