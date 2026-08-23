@@ -1,0 +1,142 @@
+[
+  {
+    "id": "Q01",
+    "query": "What payment methods do you accept?",
+    "category": "general_policy",
+    "expected_decision": "answer",
+    "notes": "Clear-cut informational question, directly matches FAQ-002."
+  },
+  {
+    "id": "Q02",
+    "query": "When does my billing cycle renew each month?",
+    "category": "general_policy",
+    "expected_decision": "answer",
+    "notes": "Clear-cut informational question, directly matches FAQ-001."
+  },
+  {
+    "id": "Q03",
+    "query": "Something about the taxes on my account is confusing, can you explain what's going on?",
+    "category": "general_policy",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — no concrete question, low confidence expected even at the 0.60 bar."
+  },
+  {
+    "id": "Q04",
+    "query": "My card was declined when my subscription tried to renew, what should I do?",
+    "category": "payment_failure",
+    "expected_decision": "answer",
+    "notes": "Clear-cut, matches FAQ-008/TCK-1011 retry guidance."
+  },
+  {
+    "id": "Q05",
+    "query": "My bank says a recent payment attempt failed for insufficient funds, will you retry it automatically?",
+    "category": "payment_failure",
+    "expected_decision": "answer",
+    "notes": "Clear-cut, matches TCK-1013 dunning retry schedule."
+  },
+  {
+    "id": "Q06",
+    "query": "Something's wrong with my payment, can you check on it?",
+    "category": "payment_failure",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — no detail on what's wrong, should escalate rather than guess."
+  },
+  {
+    "id": "Q07",
+    "query": "If I cancel my subscription today, when does my access actually end?",
+    "category": "cancellation",
+    "expected_decision": "answer",
+    "notes": "Clear-cut, matches FAQ-015/TCK-1016."
+  },
+  {
+    "id": "Q08",
+    "query": "I cancelled my account two weeks ago but changed my mind — can I get it reactivated?",
+    "category": "cancellation",
+    "expected_decision": "answer",
+    "notes": "Clear-cut, matches TCK-1019 reactivation policy (within 30 days)."
+  },
+  {
+    "id": "Q09",
+    "query": "I want to stop being charged, can you just do something about it?",
+    "category": "cancellation",
+    "expected_decision": "answer",
+    "notes": "Relabeled from 'escalate' after investigation: 'stop being charged' unambiguously means cancel, and FAQ-015/TCK-1016 directly answer it — the bot answering here is correct behavior, not a miss."
+  },
+  {
+    "id": "Q10",
+    "query": "If I downgrade from Pro to Starter, does that happen immediately or at the end of my cycle?",
+    "category": "upgrade_downgrade",
+    "expected_decision": "answer",
+    "notes": "Clear-cut, matches FAQ-007/TCK-1022."
+  },
+  {
+    "id": "Q11",
+    "query": "I think my plan got downgraded somehow but I'm not sure why or what changed.",
+    "category": "upgrade_downgrade",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — customer isn't sure what happened, needs investigation not a policy answer."
+  },
+  {
+    "id": "Q12",
+    "query": "What's your refund policy for monthly plans if I haven't used the service much?",
+    "category": "refund",
+    "expected_decision": "answer",
+    "notes": "Clear-cut policy question, no specific dollar amount, matches FAQ-004. Tests that money-moving categories can still answer at >=0.90 confidence with no amount at stake."
+  },
+  {
+    "id": "Q13",
+    "query": "I was accidentally charged $150 for the wrong plan, can I get a refund?",
+    "category": "refund",
+    "expected_decision": "escalate",
+    "notes": "Money-specific: $150 > $100 cap for refund category, must escalate regardless of retrieval confidence."
+  },
+  {
+    "id": "Q14",
+    "query": "I want my money back for something that happened last month, I don't remember exactly how much.",
+    "category": "refund",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — no clear charge identified, low confidence expected."
+  },
+  {
+    "id": "Q15",
+    "query": "How exactly is my bill prorated if I upgrade my plan in the middle of a billing cycle?",
+    "category": "proration",
+    "expected_decision": "answer",
+    "notes": "Clear-cut policy question, matches FAQ-003/TCK-1006."
+  },
+  {
+    "id": "Q16",
+    "query": "My proration credit after downgrading came out to $340, is that correct?",
+    "category": "proration",
+    "expected_decision": "escalate",
+    "notes": "Money-specific: $340 > $100 cap for proration category, matches TCK-1010's escalation pattern."
+  },
+  {
+    "id": "Q17",
+    "query": "The proration on my last invoice seems off but I can't tell exactly why.",
+    "category": "proration",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — no concrete numbers to verify against, low confidence expected."
+  },
+  {
+    "id": "Q18",
+    "query": "What counts as an API overage charge on my invoice?",
+    "category": "invoice_dispute",
+    "expected_decision": "answer",
+    "notes": "Clear-cut policy question, matches FAQ-020/TCK-1026."
+  },
+  {
+    "id": "Q19",
+    "query": "I was charged $210 in VAT on my invoice that I don't think should apply to my business.",
+    "category": "invoice_dispute",
+    "expected_decision": "escalate",
+    "notes": "Money-specific: $210 > $100 cap for invoice_dispute category, matches TCK-1028."
+  },
+  {
+    "id": "Q20",
+    "query": "My invoice just looks wrong somehow this month, can you take a look?",
+    "category": "invoice_dispute",
+    "expected_decision": "escalate",
+    "notes": "Underspecified — no specific line item identified, low confidence expected."
+  }
+]

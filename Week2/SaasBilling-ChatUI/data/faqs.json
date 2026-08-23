@@ -1,0 +1,134 @@
+[
+  {
+    "id": "FAQ-001",
+    "category": "general_policy",
+    "question": "When does my billing cycle start and end?",
+    "answer": "Your billing cycle starts on the day you first subscribed (or last changed plans) and renews on the same day each month, or each year for annual plans. You can see your exact next billing date under Settings > Billing > Subscription."
+  },
+  {
+    "id": "FAQ-002",
+    "category": "general_policy",
+    "question": "What payment methods are accepted?",
+    "answer": "We accept all major credit and debit cards (Visa, Mastercard, American Express, Discover). Annual and Enterprise plans can also be paid via ACH bank transfer or wire invoice on request."
+  },
+  {
+    "id": "FAQ-003",
+    "category": "proration",
+    "question": "How is proration calculated when I change plans?",
+    "answer": "Proration is calculated daily. When you upgrade, we credit the unused days on your old plan and charge the difference for the remaining days on the new plan, billed immediately. When you downgrade, the unused-time credit is applied to your next invoice."
+  },
+  {
+    "id": "FAQ-004",
+    "category": "refund",
+    "question": "What is your refund policy?",
+    "answer": "Monthly plans can be refunded in full within 7 days of the charge if unused. Annual plans can be refunded in full within 14 days of purchase. After those windows, refunds are considered case-by-case and may result in a partial credit instead of a cash refund."
+  },
+  {
+    "id": "FAQ-005",
+    "category": "general_policy",
+    "question": "How do I update my payment information?",
+    "answer": "Go to Settings > Billing > Payment Methods and click 'Update Card'. Changes take effect immediately and will be used for your next scheduled charge or retry."
+  },
+  {
+    "id": "FAQ-006",
+    "category": "cancellation",
+    "question": "What happens to my data when I cancel?",
+    "answer": "Your data is retained for 30 days after cancellation in case you want to reactivate. After 30 days, data is permanently deleted per our data retention policy. You can export your data at any time before cancellation from Settings > Export."
+  },
+  {
+    "id": "FAQ-007",
+    "category": "upgrade_downgrade",
+    "question": "When does a downgrade take effect?",
+    "answer": "By default, downgrades take effect at the end of your current billing cycle so you keep your current plan's features until then. You can request an immediate downgrade instead, which applies right away and issues a prorated credit."
+  },
+  {
+    "id": "FAQ-008",
+    "category": "payment_failure",
+    "question": "What happens if my payment fails?",
+    "answer": "We automatically retry a failed payment up to 3 times over 7 days. You'll receive an email after each failed attempt. If all retries fail, your account enters a 3-day grace period before access is restricted."
+  },
+  {
+    "id": "FAQ-009",
+    "category": "general_policy",
+    "question": "How do dunning and past-due notices work?",
+    "answer": "If payment fails, we send reminder emails on day 1 and day 4. On day 7, some features may be restricted. On day 14 without payment, the account is suspended. Updating your payment method at any point resumes normal billing."
+  },
+  {
+    "id": "FAQ-010",
+    "category": "general_policy",
+    "question": "Do you charge sales tax or VAT?",
+    "answer": "Sales tax or VAT is calculated automatically based on your billing address and applicable local tax laws. If you're tax-exempt or have a VAT number, you can submit it in Settings > Billing > Tax Information."
+  },
+  {
+    "id": "FAQ-011",
+    "category": "invoice_dispute",
+    "question": "I don't recognize a charge on my invoice, what should I do?",
+    "answer": "Check Settings > Billing > Invoice History for an itemized breakdown of every charge, including plan fees, add-ons, and usage overages. If something still looks wrong, contact support with the invoice number for a manual review."
+  },
+  {
+    "id": "FAQ-012",
+    "category": "general_policy",
+    "question": "Can I get a copy of a past invoice?",
+    "answer": "Yes, all past invoices are available as PDF downloads under Settings > Billing > Invoice History, going back to your account's creation date."
+  },
+  {
+    "id": "FAQ-013",
+    "category": "upgrade_downgrade",
+    "question": "Will I lose data if I downgrade to a plan with lower limits?",
+    "answer": "No data is deleted immediately. Data or features beyond your new plan's limits become read-only/archived for 90 days, giving you time to export or re-upgrade before anything is removed."
+  },
+  {
+    "id": "FAQ-014",
+    "category": "general_policy",
+    "question": "How do add-ons get billed?",
+    "answer": "Add-ons (like extra seats or storage) are billed on the same cycle as your base plan. Adding one mid-cycle is prorated for the remaining days; removing one credits the unused portion to your next invoice."
+  },
+  {
+    "id": "FAQ-015",
+    "category": "cancellation",
+    "question": "Can I cancel at any time?",
+    "answer": "Yes, you can cancel anytime from Settings > Subscription > Cancel Plan. By default, cancellation takes effect at the end of your current paid period so you don't lose access early; immediate cancellation can be requested instead."
+  },
+  {
+    "id": "FAQ-016",
+    "category": "refund",
+    "question": "How long do refunds take to process?",
+    "answer": "Approved refunds are issued to your original payment method and typically appear within 5-10 business days, depending on your bank or card issuer's processing time."
+  },
+  {
+    "id": "FAQ-017",
+    "category": "general_policy",
+    "question": "What's the difference between monthly and annual billing?",
+    "answer": "Annual billing is charged once a year at a discounted rate (roughly 2 months free compared to paying monthly) while monthly billing is charged every 30 days at the standard rate. You can switch between them at any time."
+  },
+  {
+    "id": "FAQ-018",
+    "category": "payment_failure",
+    "question": "Why did my payment fail even though I have funds available?",
+    "answer": "Common causes include an expired card, a bank fraud block on an unfamiliar merchant charge, or a currency mismatch between your card and your account's billing currency. Checking with your bank or updating your card usually resolves it."
+  },
+  {
+    "id": "FAQ-019",
+    "category": "general_policy",
+    "question": "Can I change my billing currency?",
+    "answer": "Yes, billing currency can be changed under Settings > Billing > Currency. The change applies starting with your next invoice; past invoices are not retroactively converted."
+  },
+  {
+    "id": "FAQ-020",
+    "category": "invoice_dispute",
+    "question": "What counts as an API/usage overage charge?",
+    "answer": "Each plan includes a monthly quota of API calls or usage units. Exceeding that quota incurs an overage charge at the published per-unit rate, itemized separately on your invoice."
+  },
+  {
+    "id": "FAQ-021",
+    "category": "general_policy",
+    "question": "Do you offer discounts for non-profits or students?",
+    "answer": "Yes, verified non-profits and educational institutions can apply for a 20% discount through Settings > Billing > Discounts, subject to verification of eligibility documents."
+  },
+  {
+    "id": "FAQ-022",
+    "category": "upgrade_downgrade",
+    "question": "Is there a limit to how often I can change plans?",
+    "answer": "There's no hard limit, but plan changes made more than once within the same billing cycle may result in additional proration adjustments on your next invoice to keep billing accurate."
+  }
+]

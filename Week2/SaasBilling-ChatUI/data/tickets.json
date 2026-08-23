@@ -1,0 +1,282 @@
+[
+  {
+    "id": "TCK-1001",
+    "category": "refund",
+    "subject": "Refund requested for accidental annual upgrade",
+    "customer_message": "I meant to renew monthly but got charged $348 for the annual Pro plan. Can I get a refund?",
+    "resolution": "Confirmed the annual charge was an accidental selection at checkout within the last 24 hours. Issued a full refund of $348.00 to the original payment method and reverted the subscription to monthly Pro billing.",
+    "dollar_amount": 348.00
+  },
+  {
+    "id": "TCK-1002",
+    "category": "refund",
+    "subject": "Refund for duplicate charge",
+    "customer_message": "I was charged twice this month for my Starter plan, $29 each. Please refund one of them.",
+    "resolution": "Verified two identical $29.00 charges within 48 hours due to a failed webhook retry. Refunded the duplicate charge of $29.00; original subscription charge remains valid.",
+    "dollar_amount": 29.00
+  },
+  {
+    "id": "TCK-1003",
+    "category": "refund",
+    "subject": "Refund denied for used annual plan",
+    "customer_message": "I want a refund for the remaining 9 months of my annual Business plan, that's around $675, I'm not using it anymore.",
+    "resolution": "Per policy, annual plans are refundable in full only within 14 days of purchase. Customer was 5 months into the term. Escalated to billing lead; partial goodwill credit of $150 approved and refund request for the full $675 denied.",
+    "dollar_amount": 675.00
+  },
+  {
+    "id": "TCK-1004",
+    "category": "refund",
+    "subject": "Refund after downgrade confusion",
+    "customer_message": "I downgraded from Business to Pro but was still charged the Business rate of $99, can I get that back?",
+    "resolution": "Confirmed downgrade was submitted after the billing cycle had already generated the invoice. Refunded the $60 difference between Business ($99) and Pro ($39) for the affected cycle.",
+    "dollar_amount": 60.00
+  },
+  {
+    "id": "TCK-1005",
+    "category": "refund",
+    "subject": "Small refund for unused add-on",
+    "customer_message": "I added the extra seats add-on by mistake, it's only $15, can you take it off and refund it?",
+    "resolution": "Removed the extra-seats add-on immediately and refunded the prorated $15.00 charge to the original payment method within confidence policy (small amount, high certainty).",
+    "dollar_amount": 15.00
+  },
+  {
+    "id": "TCK-1006",
+    "category": "proration",
+    "subject": "Proration question after mid-cycle upgrade",
+    "customer_message": "I upgraded from Starter to Pro on day 15 of a 30-day cycle, how was the $35 charge calculated?",
+    "resolution": "Explained proration: remaining 15 days of Starter ($14.50 credit) applied against 15 days of Pro ($49.50), resulting in a net charge of $35.00, billed immediately at upgrade time.",
+    "dollar_amount": 35.00
+  },
+  {
+    "id": "TCK-1007",
+    "category": "proration",
+    "subject": "Proration credit larger than expected",
+    "customer_message": "I downgraded from Business to Starter and got a $120 credit, is that normal?",
+    "resolution": "Verified downgrade occurred on day 3 of a 30-day annual-equivalent cycle, resulting in a large unused-time credit of $120.00 applied to the next invoice, consistent with proration policy.",
+    "dollar_amount": 120.00
+  },
+  {
+    "id": "TCK-1008",
+    "category": "proration",
+    "subject": "No proration applied on plan swap",
+    "customer_message": "I switched plans mid-month and wasn't charged or credited anything, is that a bug?",
+    "resolution": "Confirmed the swap was between two plans at the same price point (lateral move), so proration correctly resulted in a net $0.00 adjustment. No bug found.",
+    "dollar_amount": 0.0
+  },
+  {
+    "id": "TCK-1009",
+    "category": "proration",
+    "subject": "Proration on annual-to-monthly switch",
+    "customer_message": "I moved from annual Pro ($468/yr) to monthly Pro mid-term, how is that prorated?",
+    "resolution": "Calculated remaining annual value (~$210 unused) applied as account credit, monthly Pro billing ($39/mo) began immediately using the credit balance first.",
+    "dollar_amount": 210.00
+  },
+  {
+    "id": "TCK-1010",
+    "category": "proration",
+    "subject": "Large proration dispute over $100",
+    "customer_message": "My proration credit shows $340 short compared to what I calculated myself, need this reviewed.",
+    "resolution": "Discrepancy exceeded the $100 confidence threshold for automated resolution; escalated to a billing specialist for manual ledger review. Specialist found a plan-change timestamp bug and corrected the credit.",
+    "dollar_amount": 340.00
+  },
+  {
+    "id": "TCK-1011",
+    "category": "payment_failure",
+    "subject": "Card declined at renewal",
+    "customer_message": "My renewal payment failed, it says my card was declined. What do I do?",
+    "resolution": "Advised customer to update their card in Billing > Payment Methods and retry payment. Retry succeeded; service was not interrupted since it was within the 7-day grace period.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1012",
+    "category": "payment_failure",
+    "subject": "Repeated payment failures, account at risk",
+    "customer_message": "I've gotten three failed payment emails this week, is my account going to be suspended?",
+    "resolution": "Explained the dunning process: 3 retry attempts over 7 days, then a 3-day grace period before suspension. Helped customer update expired card; next retry scheduled automatically.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1013",
+    "category": "payment_failure",
+    "subject": "Payment failed due to insufficient funds",
+    "customer_message": "My bank says the payment attempt failed for insufficient funds, will you keep trying?",
+    "resolution": "Confirmed automatic retry is scheduled in 3 days per dunning schedule. Customer can also trigger an immediate retry manually from the billing page once funds are available.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1014",
+    "category": "payment_failure",
+    "subject": "Bank flagged charge as fraud",
+    "customer_message": "My bank blocked the charge thinking it was fraud, how do I fix this?",
+    "resolution": "Advised customer to contact their bank to whitelist the merchant charge descriptor 'BILLINGCO*SUB', then retry payment from the billing dashboard.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1015",
+    "category": "payment_failure",
+    "subject": "Currency mismatch causing decline",
+    "customer_message": "My card is in EUR but the charge attempt shows USD and keeps failing.",
+    "resolution": "Confirmed account billing currency was set to USD by default. Switched billing currency to EUR at customer's request; payment succeeded on next attempt.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1016",
+    "category": "cancellation",
+    "subject": "How to cancel subscription",
+    "customer_message": "I want to cancel my subscription at the end of this billing cycle, how do I do that?",
+    "resolution": "Walked customer through Settings > Subscription > Cancel Plan. Confirmed cancellation is scheduled for the end of the current paid cycle; access continues until then.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1017",
+    "category": "cancellation",
+    "subject": "Cancellation confirmation not received",
+    "customer_message": "I cancelled last week but never got a confirmation email, did it actually go through?",
+    "resolution": "Verified in the system that cancellation was processed successfully on the requested date. Resent the cancellation confirmation email; a delivery delay was the cause.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1018",
+    "category": "cancellation",
+    "subject": "Wants to cancel immediately, not at cycle end",
+    "customer_message": "Can I cancel right now instead of waiting until the end of the month?",
+    "resolution": "Explained that plans are non-refundable mid-cycle per policy, but immediate cancellation is possible on request; customer opted for immediate cancellation with access ending same day.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1019",
+    "category": "cancellation",
+    "subject": "Reactivating a cancelled account",
+    "customer_message": "I cancelled two weeks ago but changed my mind, can I get my account back?",
+    "resolution": "Reactivated the account on the previous plan tier (Pro). Since the account was inactive less than 30 days, no data was lost and no new setup fee applied.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1020",
+    "category": "cancellation",
+    "subject": "Cancellation due to unused seats",
+    "customer_message": "We only use 2 of our 10 seats, should we cancel and start over on a smaller plan?",
+    "resolution": "Recommended downgrading seat count instead of cancelling to preserve historical data and integrations; walked through seat-reduction flow instead of full cancellation.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1021",
+    "category": "upgrade_downgrade",
+    "subject": "Upgrade from Starter to Business",
+    "customer_message": "I want to upgrade from Starter to Business, what happens to my current billing date?",
+    "resolution": "Confirmed upgrades take effect immediately and the billing date does not change; the price difference is prorated and charged right away.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1022",
+    "category": "upgrade_downgrade",
+    "subject": "Downgrade takes effect at cycle end",
+    "customer_message": "If I downgrade from Pro to Starter, does it happen right away or later?",
+    "resolution": "Clarified that downgrades are scheduled for the end of the current billing cycle by default, so full access to Pro features continues until then, unless immediate downgrade is explicitly requested.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1023",
+    "category": "upgrade_downgrade",
+    "subject": "Feature loss after downgrade",
+    "customer_message": "Will I lose my saved reports if I downgrade from Business to Pro?",
+    "resolution": "Explained that saved reports beyond the Pro plan's limit are archived (not deleted) for 90 days and become read-only; upgrading again within that window restores full access.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1024",
+    "category": "upgrade_downgrade",
+    "subject": "Switching from monthly to annual",
+    "customer_message": "Can I switch my Pro plan from monthly to annual billing to save money?",
+    "resolution": "Switched billing frequency to annual Pro ($468/yr, equivalent to 2 months free vs monthly). Prorated credit for unused monthly days applied to the first annual invoice.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1025",
+    "category": "upgrade_downgrade",
+    "subject": "Enterprise upgrade inquiry",
+    "customer_message": "We're growing past 50 seats, can we move from Business to Enterprise?",
+    "resolution": "Connected customer with the enterprise sales team for custom pricing and a contract, since Enterprise plans are not self-serve.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1026",
+    "category": "invoice_dispute",
+    "subject": "Disputed line item on invoice",
+    "customer_message": "My invoice has a $45 'API overage' charge I don't recognize.",
+    "resolution": "Reviewed usage logs and confirmed the account exceeded the included API call quota by 15,000 calls, generating the $45.00 overage charge per the plan's published overage rate.",
+    "dollar_amount": 45.00
+  },
+  {
+    "id": "TCK-1027",
+    "category": "invoice_dispute",
+    "subject": "Invoice total doesn't match quote",
+    "customer_message": "Sales quoted me $199/month but my invoice says $249, a $50 difference. Can you look into it?",
+    "resolution": "Discrepancy involved a signed sales quote; exceeded automated resolution scope. Escalated to billing lead who confirmed the quoted promotional rate and issued a $50.00 credit plus corrected future invoices.",
+    "dollar_amount": 50.00
+  },
+  {
+    "id": "TCK-1028",
+    "category": "invoice_dispute",
+    "subject": "Large invoice dispute over VAT",
+    "customer_message": "I was charged $210 in VAT I don't think applies to my business, need this reviewed.",
+    "resolution": "Amount exceeded the $100 automatic-escalation threshold for invoice disputes; routed to the tax/billing specialist team for a VAT-exemption document review.",
+    "dollar_amount": 210.00
+  },
+  {
+    "id": "TCK-1029",
+    "category": "invoice_dispute",
+    "subject": "Small rounding discrepancy on invoice",
+    "customer_message": "My invoice shows $39.01 instead of $39.00, is that a bug?",
+    "resolution": "Confirmed a $0.01 currency-conversion rounding artifact from EUR-to-USD conversion; no action needed, difference is within normal rounding tolerance.",
+    "dollar_amount": 0.01
+  },
+  {
+    "id": "TCK-1030",
+    "category": "invoice_dispute",
+    "subject": "Duplicate line item on invoice",
+    "customer_message": "My latest invoice lists the Pro plan charge twice, total looks like $78 instead of $39.",
+    "resolution": "Confirmed a rendering bug duplicated the line item display only; actual charge processed was $39.00 (single charge). Corrected invoice PDF re-issued.",
+    "dollar_amount": 39.00
+  },
+  {
+    "id": "TCK-1031",
+    "category": "general_policy",
+    "subject": "How is sales tax determined?",
+    "customer_message": "Why was I charged sales tax on my invoice this month but not last month?",
+    "resolution": "Explained that sales tax is calculated based on the billing address on file and can change if tax nexus rules or the address changes; no error found on this account.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1032",
+    "category": "general_policy",
+    "subject": "VAT number not applied",
+    "customer_message": "I added my VAT number but it's still not showing as removed on my invoice.",
+    "resolution": "Found the VAT number was saved but not marked verified. Re-submitted for verification; VAT was correctly excluded starting with the next invoice.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1033",
+    "category": "general_policy",
+    "subject": "Past-due notice, what happens next",
+    "customer_message": "I got a past-due notice, what happens if I don't pay in time?",
+    "resolution": "Explained the dunning schedule: reminder emails on day 1 and 4, service restriction on day 7 if unresolved, and full suspension on day 14. Encouraged updating payment method to avoid interruption.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1034",
+    "category": "general_policy",
+    "subject": "Where to update billing email",
+    "customer_message": "How do I change the email address that receives my invoices?",
+    "resolution": "Directed customer to Settings > Billing > Billing Contact to update the invoice recipient email; change takes effect on the next billing event.",
+    "dollar_amount": null
+  },
+  {
+    "id": "TCK-1035",
+    "category": "general_policy",
+    "subject": "Tax exemption certificate submission",
+    "customer_message": "We're a registered non-profit, how do we submit a tax exemption certificate?",
+    "resolution": "Provided the tax-exemption submission portal link and explained processing takes 3-5 business days; future invoices will exclude sales tax once approved.",
+    "dollar_amount": null
+  }
+]
