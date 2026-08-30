@@ -1,0 +1,9 @@
+flowchart LR
+    Q["Category query<br/>(templated per category)"] --> YC["You.com<br/>search_web / search_news"]
+    YC --> R[RawSearchResult]
+    R --> D{"Dedup by<br/>canonical URL + content hash"}
+    D -->|new| CH[RecursiveCharacterTextSplitter]
+    D -->|duplicate| SKIP["Reuse existing evidence_id<br/>(no re-embedding)"]
+    CH --> EMB["OpenAI embeddings<br/>(text-embedding-3-small)"]
+    EMB --> PV[("Pinecone<br/>vector + metadata")]
+    R --> PGR[("Postgres<br/>research_evidence row")]

@@ -1,0 +1,24 @@
+{
+  "results": {
+    "web": [
+      {
+        "title": "Pipeline Harbor — CRM for small sales teams",
+        "url": "https://pipelineharbor.com",
+        "description": "Pipeline Harbor is a CRM built for small B2B sales teams.",
+        "snippets": ["Pipeline Harbor is a CRM built for small B2B sales teams."],
+        "contents": {"highlights": ["CRM built for small B2B sales teams", "14-day free trial"]},
+        "page_age": "2026-06-01T00:00:00Z"
+      },
+      {
+        "title": "Northwind CRM pricing",
+        "url": "https://northwindcrm.io/pricing",
+        "description": "Northwind CRM plans start at $19/mo for small teams.",
+        "snippets": ["Northwind CRM plans start at $19/mo for small teams."],
+        "contents": {},
+        "page_age": "2026-05-15T00:00:00Z"
+      }
+    ],
+    "news": []
+  },
+  "metadata": {"search_uuid": "example-uuid", "query": "example query", "latency": 0.42}
+}

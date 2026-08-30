@@ -1,0 +1,65 @@
+[project]
+name = "market-research-agent"
+version = "0.1.0"
+description = "Multi-agent competitor research MVP: discovery, web research, analysis/verification, and cited briefing generation."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "streamlit>=1.40.0",
+    "langgraph>=0.2.60",
+    "langgraph-checkpoint-postgres>=2.0.0",
+    "langchain>=0.3.10",
+    "langchain-openai>=0.2.10",
+    "langchain-core>=0.3.20",
+    "langchain-text-splitters>=0.3.0",
+    "langsmith>=0.1.140",
+    "openai>=1.55.0",
+    "pinecone>=5.4.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2.3",
+    "alembic>=1.14.0",
+    "tenacity>=9.0.0",
+    "httpx>=0.27.2",
+    "reportlab>=4.2.5",
+    "python-dotenv>=1.0.1",
+    "structlog>=24.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-mock>=3.14.0",
+    "testcontainers[postgres]>=4.8.2",
+    "pypdf>=5.1.0",
+    "responses>=0.25.3",
+    "ruff>=0.7.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --log-cli-level=INFO"
+markers = [
+    "requires_postgres: needs a reachable Postgres via TEST_DATABASE_URL (skipped otherwise)",
+]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# B008: FastAPI's Depends(...)-as-default-argument is the standard DI idiom,
+# not the mutable-default-argument bug this rule targets elsewhere.
+ignore = ["B008"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app", "eval"]

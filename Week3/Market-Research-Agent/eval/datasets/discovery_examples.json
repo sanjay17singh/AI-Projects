@@ -1,0 +1,50 @@
+[
+  {
+    "inputs": {
+      "target_company_name": "Brightleaf CRM",
+      "target_company_website": "https://brightleafcrm.com",
+      "industry": "CRM software",
+      "geography": "North America",
+      "customer_segment": "Small business, 10-50 employees",
+      "news_window_days": 60
+    }
+  },
+  {
+    "inputs": {
+      "target_company_name": "Notion",
+      "target_company_website": "https://notion.so",
+      "industry": "Productivity software",
+      "geography": "Global",
+      "customer_segment": "Knowledge workers and small teams",
+      "news_window_days": 90
+    }
+  },
+  {
+    "inputs": {
+      "target_company_name": "Ramp",
+      "target_company_website": "https://ramp.com",
+      "industry": "Corporate card and spend management",
+      "geography": "United States",
+      "customer_segment": "Mid-market and startups",
+      "news_window_days": 60
+    }
+  },
+  {
+    "inputs": {
+      "target_company_name": "Loom",
+      "industry": "Async video messaging",
+      "geography": "Global",
+      "customer_segment": "Remote teams",
+      "news_window_days": 90
+    }
+  },
+  {
+    "inputs": {
+      "target_company_name": "Gusto",
+      "industry": "Payroll and HR software",
+      "geography": "United States",
+      "customer_segment": "Small business",
+      "news_window_days": 60
+    }
+  }
+]

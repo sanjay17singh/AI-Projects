@@ -1,0 +1,27 @@
+flowchart TB
+    subgraph Frontend
+        ST[Streamlit app]
+    end
+    subgraph Backend["FastAPI backend"]
+        API[REST endpoints]
+        DG["Discovery Graph<br/>(LangGraph)"]
+        RAG["Research + Analysis Graph<br/>(LangGraph)"]
+    end
+    subgraph External["External services"]
+        YC[You.com]
+        OAI[OpenAI]
+        PC[Pinecone]
+    end
+    PG[("Postgres<br/>audit trail + checkpoints")]
+
+    ST -->|REST| API
+    API --> DG
+    API --> RAG
+    DG --> YC
+    DG --> OAI
+    DG --> PG
+    RAG --> YC
+    RAG --> OAI
+    RAG --> PC
+    RAG --> PG
+    API --> PG

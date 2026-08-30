@@ -1,0 +1,10 @@
+flowchart TB
+    subgraph Agents
+        DA[Discovery Agent]
+        WR[Web Research Agent]
+        AV[Analysis & Verification Agent]
+    end
+    DA -->|"5 scored candidates"| USER((User))
+    USER -->|"picks 3"| WR
+    WR -->|"evidence"| AV
+    AV -->|"cited claims"| BRIEF[Briefing]

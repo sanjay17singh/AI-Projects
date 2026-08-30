@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+uv.lock.bak
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.streamlit/secrets.toml
+*.db
+*.sqlite3
+.DS_Store
+htmlcov/
+.coverage
+dist/
+build/

@@ -1,0 +1,12 @@
+flowchart LR
+    A[Research request] --> B["Discovery Agent<br/>(You.com search)"]
+    B --> C["5 candidates<br/>scored + classified"]
+    C --> D{"Human selects<br/>exactly 3"}
+    D --> E["Web Research Agent<br/>×3, concurrent"]
+    E --> F[("Evidence<br/>Postgres + Pinecone")]
+    F --> G["Analysis & Verification<br/>Agent ×3, concurrent"]
+    G --> H{"Coverage gate"}
+    H -->|below threshold, retries left| I["Gap research"]
+    I --> G
+    H -->|sufficient, or retries exhausted| J["Compile briefing"]
+    J --> K["Markdown / CSV / PDF<br/>with resolved citations"]

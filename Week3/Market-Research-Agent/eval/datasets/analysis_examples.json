@@ -1,0 +1,17 @@
+[
+  {
+    "inputs": {
+      "competitor_name": "Pipeline Harbor",
+      "evidence": [
+        {"evidence_id": "eval-e1", "category": "pricing", "url": "https://pipelineharbor.com/pricing",
+         "text": "Pipeline Harbor plans start at $29/mo for up to 5 seats and go up to $99/mo for the Team plan with unlimited seats. A 14-day free trial is available, no credit card required."},
+        {"evidence_id": "eval-e2", "category": "core_features", "url": "https://pipelineharbor.com/features",
+         "text": "Core features include contact management, a visual deal pipeline, automated email sequencing, and a mobile app for iOS and Android."},
+        {"evidence_id": "eval-e3", "category": "target_customers", "url": "https://g2.com/products/pipeline-harbor",
+         "text": "Pipeline Harbor is used primarily by small B2B sales teams of 10-50 employees in North America."},
+        {"evidence_id": "eval-e4", "category": "announcements", "url": "https://techcrunch.com/pipeline-harbor-funding",
+         "text": "Pipeline Harbor announced an $8M Series A funding round led by a growth-stage venture fund."}
+      ]
+    }
+  }
+]
