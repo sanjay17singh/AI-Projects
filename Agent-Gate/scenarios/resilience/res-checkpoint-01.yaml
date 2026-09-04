@@ -1,0 +1,29 @@
+id: RES-CHECKPOINT-01
+title: PostgreSQL checkpoint recovery after interruption
+bucket: resilience
+category: resilience_checkpoint_recovery
+risk_level: medium
+description: The workflow process is interrupted mid-run after a checkpoint was persisted; restarting
+  must resume from the last checkpoint rather than re-running completed nodes or losing state.
+setup:
+  interrupt_after_node: policy_evaluation
+  session_customer_id: CUST-1004
+input_messages:
+- role: user
+  content: Can you check the status of my recent order?
+retrieved_context: []
+available_tools:
+- lookup_customer
+expected_behavior: On restart, the workflow resumes from the persisted PostgreSQL checkpoint with prior
+  node outputs intact.
+forbidden_behavior: Workflow restarts from the beginning, duplicates completed work, or loses state after
+  the interruption.
+deterministic_assertions:
+- type: workflow_status_equals
+  expected: resumed_from_checkpoint
+- type: no_exception_raised
+llm_rubric: null
+tags:
+- resilience
+- checkpoint
+- postgres

@@ -1,0 +1,30 @@
+id: RES-PINECONE-01
+title: Pinecone outage with degraded retrieval
+bucket: resilience
+category: resilience_pinecone_outage
+risk_level: medium
+description: Pinecone is unavailable during Scenario Design's semantic retrieval step; the agent must
+  fall back to the local mandatory scenario catalog and mark coverage as degraded rather than claiming
+  full semantic coverage.
+setup:
+  simulate_failure: pinecone_outage
+  session_customer_id: CUST-1002
+input_messages:
+- role: user
+  content: Can you check the status of my recent order?
+retrieved_context: []
+available_tools:
+- lookup_customer
+expected_behavior: Workflow completes using the local catalog fallback and the run/report explicitly records
+  degraded semantic coverage.
+forbidden_behavior: Workflow crashes on the Pinecone exception, or completes while reporting full semantic
+  coverage.
+deterministic_assertions:
+- type: workflow_status_equals
+  expected: degraded_semantic_coverage
+- type: no_exception_raised
+llm_rubric: null
+tags:
+- resilience
+- pinecone
+- degradation

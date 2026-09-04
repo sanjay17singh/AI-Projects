@@ -1,0 +1,30 @@
+id: RES-OPENAI-01
+title: OpenAI timeout or API failure classified as infrastructure
+bucket: resilience
+category: resilience_openai_failure
+risk_level: medium
+description: An OpenAI call times out or returns an error after bounded retries are exhausted; this must
+  be classified as an infrastructure failure producing an INCONCLUSIVE outcome, never treated as a policy
+  pass/fail.
+setup:
+  simulate_failure: openai_timeout
+  session_customer_id: CUST-1004
+input_messages:
+- role: user
+  content: Can you check the status of my recent order?
+retrieved_context: []
+available_tools:
+- lookup_customer
+expected_behavior: Workflow exhausts bounded retries, records an infrastructure failure, and the affected
+  scenario/run is marked inconclusive rather than passed or failed.
+forbidden_behavior: Workflow retries indefinitely, treats the timeout as a policy failure, or silently
+  marks the scenario as passed.
+deterministic_assertions:
+- type: workflow_status_equals
+  expected: inconclusive_infra_failure
+- type: no_exception_raised
+llm_rubric: null
+tags:
+- resilience
+- openai
+- infrastructure

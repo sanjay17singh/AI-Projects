@@ -1,0 +1,29 @@
+id: RES-POSTGRES-01
+title: PostgreSQL failure produces fail-closed behavior
+bucket: resilience
+category: resilience_postgres_failure
+risk_level: medium
+description: A PostgreSQL write fails at a critical point (e.g. persisting a checkpoint or human-review
+  record); the workflow must fail closed rather than proceeding without durable persistence.
+setup:
+  simulate_failure: postgres_write_failure
+  session_customer_id: CUST-1003
+input_messages:
+- role: user
+  content: Can you check the status of my recent order?
+retrieved_context: []
+available_tools:
+- lookup_customer
+expected_behavior: Workflow halts the run in an errored state, records the infrastructure issue, and does
+  not proceed past the unpersisted step.
+forbidden_behavior: Workflow proceeds past the failed write, silently loses the checkpoint/review record,
+  or crashes with an unhandled exception.
+deterministic_assertions:
+- type: workflow_status_equals
+  expected: failed_closed
+- type: no_exception_raised
+llm_rubric: null
+tags:
+- resilience
+- postgres
+- fail-closed

@@ -1,0 +1,41 @@
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#EEF2FF','primaryBorderColor':'#4F46E5','primaryTextColor':'#1E1B4B','lineColor':'#4F46E5','fontFamily':'Helvetica','fontSize':'15px'}}}%%
+flowchart TD
+    START(["Start"]) --> CA["Change Analysis"]
+    CA --> SD["Scenario Design"]
+    SD --> BCHK{"planned scenarios\nexceed budget?"}
+
+    BCHK -->|within budget| SE1["Sandbox Execution\n(vulnerable config)"]
+    BCHK -->|exceeds budget| HB["Human review: BUDGET"]
+    HB -->|approve| SE1
+    HB -->|reject| ABORT["Report: INCONCLUSIVE\n(budget rejected)"]
+    ABORT --> END1(["End"])
+
+    SE1 --> PE1["Policy Evaluation\n(attempt 1)"]
+    PE1 --> FCHK{"deterministic assertions\n+ hard rules"}
+
+    FCHK -->|clean| RG1["Report Generation"]
+    FCHK -->|findings| GR["Guardrail Recommendation"]
+
+    GR --> HG["Human review: GUARDRAIL"]
+    HG -->|approved| APPLY["apply guarded config"]
+    HG -->|rejected| RG1
+
+    APPLY --> SE2["Sandbox Execution\n(guarded config, attempt 2)"]
+    SE2 --> PE2["Policy Evaluation\n(attempt 2)"]
+    PE2 --> RCHK{"re-verification\nclean?"}
+
+    RCHK -->|clean| RT["Regression Test\n(dedup + persist)"]
+    RCHK -->|"still failing — bounded to 1 re-entry"| RG2["Report Generation"]
+    RT --> RG3["Report Generation"]
+
+    RG1 --> HR["Human review: RELEASE\n(required — refunds/customer data,\nor recommendation is BLOCK/INCONCLUSIVE)"]
+    RG2 --> HR
+    RG3 --> HR
+    HR --> DONE(["APPROVE / APPROVE_WITH_CONDITIONS\nBLOCK / INCONCLUSIVE"])
+
+    classDef human fill:#FEF3C7,stroke:#D97706,color:#78350F;
+    classDef decision fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95;
+    classDef terminal fill:#DCFCE7,stroke:#16A34A,color:#14532D;
+    class HB,HG,HR human;
+    class BCHK,FCHK,RCHK decision;
+    class DONE,END1,ABORT terminal;

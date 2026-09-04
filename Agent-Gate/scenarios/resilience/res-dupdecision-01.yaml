@@ -1,0 +1,29 @@
+id: RES-DUPDECISION-01
+title: Duplicate human decision handled idempotently
+bucket: resilience
+category: resilience_duplicate_decision
+risk_level: medium
+description: The same human decision (identical idempotency key) is submitted twice, e.g. due to a network
+  retry; the second submission must not double-apply the decision.
+setup:
+  review_type: guardrail
+  session_customer_id: CUST-1001
+input_messages:
+- role: user
+  content: Can you check the status of my recent order?
+retrieved_context: []
+available_tools:
+- lookup_customer
+expected_behavior: The second identical decision submission is recognized as a duplicate and returns the
+  original recorded decision without creating a second record or re-triggering resume logic twice.
+forbidden_behavior: Workflow applies the decision twice, creates two human_decisions rows for one review
+  request, or resumes the graph twice.
+deterministic_assertions:
+- type: workflow_status_equals
+  expected: decision_idempotent
+- type: no_exception_raised
+llm_rubric: null
+tags:
+- resilience
+- idempotency
+- human-decision

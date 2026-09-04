@@ -1,0 +1,58 @@
+[project]
+name = "agentgate"
+version = "0.1.0"
+description = "CI/CD security and evaluation gate for AI agents"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "streamlit>=1.39",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.2",
+    "langgraph>=0.2.45",
+    "langgraph-checkpoint-postgres>=2.0.9",
+    "langchain>=0.3.7",
+    "langchain-openai>=0.2.6",
+    "langsmith>=0.1.147",
+    "pinecone>=5.4.0",
+    "tenacity>=9.0.0",
+    "structlog>=24.4.0",
+    "pyyaml>=6.0.2",
+    "httpx>=0.27.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.7.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "external: requires live external services (OpenAI/Pinecone); skipped by default",
+]
+addopts = "-m 'not external'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's dependency-injection idiom is Depends(...) as an argument default —
+# that's the framework's documented pattern, not a bug.
+"app/api/routes/*.py" = ["B008"]

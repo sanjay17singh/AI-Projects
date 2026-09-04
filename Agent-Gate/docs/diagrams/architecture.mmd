@@ -1,0 +1,70 @@
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#EEF2FF','primaryBorderColor':'#4F46E5','primaryTextColor':'#1E1B4B','lineColor':'#4F46E5','fontFamily':'Helvetica','fontSize':'15px'}}}%%
+flowchart TB
+    subgraph UI["Interfaces"]
+        ST["Streamlit UI\nDashboard · New evaluation · Run details\nHuman review · Final report · Scenario library"]
+        API["FastAPI\n9 endpoints"]
+    end
+
+    ST -->|HTTP| API
+
+    subgraph GRAPH["LangGraph workflow (app/graph) — Orchestrator owns every transition below"]
+        direction LR
+        CA["Change\nAnalysis"] --> SD["Scenario\nDesign"] --> SE["Sandbox\nExecution"] --> PE["Policy\nEvaluation"]
+        PE -.->|findings| GR["Guardrail\nRecommendation"]
+        GR -.->|human approves| SE
+        PE -.->|clean| RT["Regression\nTest"]
+        PE --> RG["Report\nGeneration"]
+        RT --> RG
+    end
+
+    API --> GRAPH
+
+    subgraph TARGET["Target Support Agent (sandboxed)"]
+        VULN["vulnerable config"]
+        GUARD["guarded config"]
+        TOOLS["mocked tools\nlookup_customer · search_knowledge_base\nissue_refund · create_support_message"]
+        VULN --- TOOLS
+        GUARD --- TOOLS
+    end
+
+    SE -->|runs, never touches a real system| TARGET
+
+    subgraph POLICY["Deterministic policy engine"]
+        HARD["global hard rules\nrefund cap · identity boundary"]
+        ASSERT["scenario assertion registry"]
+    end
+
+    PE --> POLICY
+    POLICY -.->|LLM rubric only after\nall deterministic checks pass;\ncan never override a failure| LLM
+
+    subgraph EXT["External services"]
+        LLM["OpenAI\ngpt-5.4-mini\nstructured outputs, bounded retry"]
+        PC["Pinecone\nsemantic retrieval\ndegrades to local catalog"]
+        LS["LangSmith\noptional, redacted tracing\noff by default"]
+    end
+
+    CA --> LLM
+    SD --> LLM
+    SD -->|prior failures, policies,\nregression descriptions| PC
+    GR --> LLM
+    RG --> LLM
+    TARGET --> LLM
+    GRAPH -.->|dev tracing, never the audit store| LS
+
+    subgraph PG["PostgreSQL — system of record"]
+        BIZ["12 business/audit tables\nruns · scenarios · executions · findings\nevidence · guardrails · reviews · decisions\nregression tests · audit events"]
+        CKPT["LangGraph checkpoints\nphysically separate schema"]
+    end
+
+    RG -->|idempotent writes,\nfail-closed on failure| PG
+    GR -->|"interrupt / resume\n(also: budget, release)"| CKPT
+
+    CATALOG["40 version-controlled scenarios\n16 adversarial · 16 benign · 8 resilience"]
+    SD --> CATALOG
+
+    classDef ext fill:#FEF3C7,stroke:#D97706,color:#78350F;
+    classDef pg fill:#DCFCE7,stroke:#16A34A,color:#14532D;
+    classDef policy fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D;
+    class LLM,PC,LS ext;
+    class BIZ,CKPT pg;
+    class HARD,ASSERT policy;

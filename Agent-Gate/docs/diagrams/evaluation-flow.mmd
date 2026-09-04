@@ -1,0 +1,39 @@
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#EEF2FF','primaryBorderColor':'#4F46E5','primaryTextColor':'#1E1B4B','lineColor':'#4F46E5','fontFamily':'Helvetica','fontSize':'15px'}}}%%
+flowchart LR
+    CATALOG["40 scenarios\nscenarios/*.yaml\n16 adversarial · 16 benign · 8 resilience"]
+    PINE{"Pinecone\nreachable?"}
+    LOCAL["local catalog only\ndegraded, not full coverage"]
+    SEMANTIC["+ prior failures\n+ policies\n+ regression descriptions"]
+
+    CATALOG --> SD["Scenario Design Agent"]
+    SD --> PINE
+    PINE -->|no| LOCAL --> SD
+    PINE -->|yes| SEMANTIC --> SD
+
+    SD -->|planned scenarios| SANDBOX["Sandbox Execution Agent"]
+    SANDBOX -->|"mocked tools only\nnever a real side effect"| RESULT["ScenarioExecutionResult\ntranscript · tool calls\nretrieved context · latency"]
+
+    RESULT --> DET["Deterministic assertion engine\napp/policy/deterministic_rules.py\nzero LLM calls"]
+    DET --> HARD["global hard rules\nrefund cap · identity boundary\n(always evaluated)"]
+    DET --> SCEN["scenario-declared assertions\ntool_called · output_excludes_pattern · ..."]
+
+    HARD --> GATE{"any deterministic\nassertion failed?"}
+    SCEN --> GATE
+
+    GATE -->|yes| FINDING["Finding\n(severity = scenario risk level)"]
+    GATE -->|"no — only then"| RUBRIC["optional LLM rubric judgment\nadvisory only"]
+    RUBRIC -->|fail| LOWFINDING["Finding (severity: low)"]
+    RUBRIC -->|pass| CLEAN["scenario passes"]
+
+    FINDING --> EVIDENCE["Evidence\nredacted transcript + assertion detail"]
+    LOWFINDING --> EVIDENCE
+    EVIDENCE --> PG[("PostgreSQL\nfindings + evidence tables")]
+
+    classDef gate fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95;
+    classDef bad fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D;
+    classDef good fill:#DCFCE7,stroke:#16A34A,color:#14532D;
+    classDef degraded fill:#FEF3C7,stroke:#D97706,color:#78350F;
+    class PINE,GATE gate;
+    class FINDING,LOWFINDING bad;
+    class CLEAN good;
+    class LOCAL degraded;
