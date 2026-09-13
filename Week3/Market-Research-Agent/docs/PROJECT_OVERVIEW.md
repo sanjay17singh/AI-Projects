@@ -63,8 +63,12 @@ The four agent roles are:
   final compilation.
 
 PostgreSQL is the formal record of what happened. Pinecone retrieves relevant
-evidence during analysis, and LangSmith helps us inspect model and workflow
-behavior. The final Markdown, CSV, and PDF exporters use the verified records
+evidence during analysis, and LangSmith remains the primary development trace
+and evaluation workspace. Future AGI is an optional, separately enabled
+quality layer: it can trace the same LangChain/LangGraph activity and its
+`evaluate()` API scores dedicated discovery, analysis, and batch-scenario
+scripts. It does not participate in production routing or replace the audit
+trail. The final Markdown, CSV, and PDF exporters use the verified records
 already stored by the pipeline; they do not ask an LLM to rewrite the facts
 one more time.
 
@@ -112,6 +116,11 @@ briefing. PostgreSQL stores the business records and events in that chain;
 Pinecone stores the searchable representation of the collected evidence.
 
 ![Research-run lifecycle: You.com-only discovery, human selection, concurrent multi-provider Web Research using You.com and optional Serper.dev, Analysis & Verification, a coverage gate that can loop into targeted gap research, and compilation into an exportable briefing](images/research-run-lifecycle-v3.png)
+
+*Future AGI is intentionally outside these numbered production stages. When
+enabled, it observes the LangChain/LangGraph activity; the separate eval and
+batch-scenario scripts exercise the same agents without changing this run
+sequence.*
 
 The sequence is straightforward:
 
@@ -277,7 +286,10 @@ but they are not independently deployed services. This keeps local setup and
 debugging manageable while leaving client and graph boundaries that could be
 moved into services later.
 
-![Market Research Agent architecture showing the Orchestrator, You.com-only competitor discovery, multi-provider Web Research with required You.com and optional Serper.dev, Analysis & Verification, human approval, Pinecone evidence, PostgreSQL records, LangSmith observability, and workflow safety controls](images/market-research-agent-overview-v2.png)
+![Market Research Agent architecture showing the Orchestrator, You.com-only competitor discovery, multi-provider Web Research, Analysis and Verification, human approval, Pinecone evidence, PostgreSQL as system of record, and separate LangSmith and optional Future AGI observability and quality paths](images/market-research-agent-overview-v3.png)
+
+*Future AGI and LangSmith receive diagnostic traces through dashed paths; neither
+platform approves competitors, changes budgets, or routes production work.*
 
 ### Main components
 
@@ -292,6 +304,7 @@ moved into services later.
 | Pinecone | Scoped semantic retrieval over evidence chunks |
 | PostgreSQL | Runs, selections, evidence, claims, costs, reports, events, and checkpoints |
 | LangSmith | Development traces, evaluations, latency, and selected production diagnostics |
+| Future AGI | Optional tracing through `LangChainInstrumentor` plus `evaluate()` scoring for dedicated eval scripts and the project-local batch scenario runner |
 
 The three competitor branches are concurrent instances of the same Web
 Research and Analysis definitions. We do not maintain six separate agents.
@@ -323,9 +336,10 @@ The graph applies the following rules:
 
 Provider-specific HTTP code lives in `app/clients/`. `YouComClient` and
 `SerperClient` implement the same search contract; `PineconeClient` owns
-vector operations; and the OpenAI and LangSmith setup functions are isolated
-from agent logic. Tests can replace each of these clients with a fake rather
-than making a paid request.
+vector operations; and the OpenAI, LangSmith, and Future AGI setup functions
+are isolated from agent logic. Future AGI imports are deferred, so the normal
+application still starts when its optional dependency group is absent. Tests
+can replace external clients with fakes rather than making paid requests.
 
 ---
 
@@ -360,6 +374,10 @@ Pinecone can be rebuilt from the evidence records. PostgreSQL cannot be
 replaced by Pinecone because it stores the authoritative relationships among
 runs, approvals, sources, claims, and costs.
 
+LangSmith and Future AGI hold diagnostic traces and evaluation results, not
+product state. A trace may be sampled, masked, disabled, or unavailable
+without changing the authoritative run recorded in PostgreSQL.
+
 ---
 
 ## 10. Technology choices
@@ -377,7 +395,8 @@ runs, approvals, sources, claims, and costs.
 | Interface | Streamlit | A small multipage UI without a separate frontend stack |
 | Schemas | Pydantic v2 | Validation at agent and API boundaries |
 | Persistence | SQLAlchemy and Alembic | Relational data access and migrations |
-| Observability | LangSmith | Trace inspection and evaluation during development |
+| Primary engineering observability | LangSmith | Trace inspection and the existing development evaluation suite |
+| Optional quality cross-check | Future AGI | Secondary traces, `evaluate()` scoring, and a project-local batch scenario harness; enabled only by explicit toggle and optional dependency group |
 | Reports | ReportLab plus Markdown/CSV exporters | Shareable cited output |
 | Tests | pytest | Credential-free behavior and integration checks |
 | Packaging | `uv` | Locked dependencies and repeatable commands |
@@ -414,6 +433,59 @@ and failures. It is not the customer-facing audit database. Production traces
 can be sampled, masked, or disabled for a privacy-sensitive workspace, while
 the required business events remain in PostgreSQL.
 
+### Future AGI quality loop
+
+![Future AGI quality loop showing golden datasets and four project-local batch scenarios running through the real agents, structural Python checks and Future AGI evaluate scoring, optional Future AGI Observe tracing, human review, and a feedback loop into prompts, retrieval, and deterministic rules](images/futureagi-quality-loop-v1.png)
+
+Future AGI is deliberately opt-in. `FUTUREAGI_ENABLED=false` is the default,
+and tracing starts only when both `FI_API_KEY` and `FI_SECRET_KEY` are present
+and the `futureagi` dependency group has been installed. FastAPI initializes
+the integration during application startup; a missing package, missing key,
+or setup failure degrades to no Future AGI tracing rather than preventing the
+application from starting.
+
+Enable the optional integration with:
+
+```bash
+uv sync --group futureagi
+```
+
+```env
+FUTUREAGI_ENABLED=true
+FI_API_KEY=...
+FI_SECRET_KEY=...
+FI_PROJECT_NAME=market-research-agent
+```
+
+Keep the toggle off when external tracing is not appropriate for the
+workspace. The evaluation scripts still require their own live provider
+credentials because they execute the underlying agents rather than evaluating
+static report text alone.
+
+The delivered integration has three separate parts:
+
+| Part | Implementation | Current status |
+|---|---|---|
+| Observe tracing | `app/clients/futureagi_client.py` registers `ProjectType.OBSERVE` and instruments LangChain/LangGraph through `LangChainInstrumentor` | Live-verified against a real Future AGI account |
+| Agent evaluation | `eval/run_discovery_eval_futureagi.py` scores answer relevancy; `eval/run_analysis_eval_futureagi.py` scores claim faithfulness | Implemented, but not yet run end-to-end with live Future AGI evaluation credentials |
+| Batch edge-case checks | `eval/simulation/run_simulation.py` drives four synthetic requests through the real agents, performs structural Python checks, and calls Future AGI `evaluate()` | Project-local harness; not Future AGI's native multi-turn `TestRunner` |
+
+The distinction in the last row matters. This application is a bounded
+research workflow rather than a conversational or voice agent. Its scenario
+runner therefore tests the real Discovery, Web Research, and Analysis agents
+directly instead of forcing them behind a chat-persona callback. The runner
+writes real records and must point at a scratch database.
+
+Future AGI does not approve competitors, raise budgets, modify graph state, or
+compile the briefing. It provides traces and quality signals for a person to
+review. Standalone `evaluate()` results currently print to the terminal; they
+are not yet attached to trace spans for display as dashboard evaluation scores.
+
+Because enabling both observability platforms can send the same prompt,
+retrieval, and model content to two external services, production use should
+apply the same sampling, masking, retention, and workspace-privacy decisions
+to both. Neither integration changes the credential-free `tests/` suite.
+
 ---
 
 ## 12. What has been delivered and tested
@@ -423,28 +495,36 @@ The repository includes:
 1. application configuration, logging, and locked dependencies;
 2. SQLAlchemy models and reversible Alembic migrations;
 3. Pydantic schemas for evidence, claims, confidence, and graph state;
-4. You.com, Serper.dev, OpenAI, Pinecone, and LangSmith client boundaries;
+4. You.com, Serper.dev, OpenAI, Pinecone, LangSmith, and Future AGI client
+   boundaries;
 5. the four agent roles and two LangGraph workflows;
 6. PostgreSQL-backed services and FastAPI endpoints;
 7. a multipage Streamlit interface;
-8. Markdown, CSV, and PDF exporters; and
-9. automated tests plus a separate optional LLM evaluation suite.
+8. Markdown, CSV, and PDF exporters;
+9. automated tests plus a separate optional LLM evaluation suite; and
+10. an optional Future AGI tracing layer, two Future AGI evaluation scripts,
+    and a project-local batch scenario runner that uses Future AGI scoring.
 
 ### Validation record
 
 | Check | Result |
 |---|---|
-| Automated suite | **45/45 test functions passed** without live provider credentials |
+| Automated suite | **49/49 test functions passed** without live provider credentials |
 | Database lifecycle | Alembic upgrade → downgrade → upgrade completed against local PostgreSQL, including the `serper` provider migration |
 | Discovery | A live OpenAI + You.com run produced five classified Oracle competitors |
 | Research and analysis | Live OpenAI + You.com + Pinecone runs produced evidence-backed RunPod and Salesforce profiles |
 | Citations | Stored evidence IDs resolved to real source titles and URLs in exported reports |
 | LangSmith | Per-node timing and per-model token usage were visible in live traces |
 | Serper.dev | Mock-tested and migration-verified, but not yet called with a live account |
+| Future AGI tracing | Live-verified: a real LangChain call was traced with a real `FI_API_KEY`/`FI_SECRET_KEY` and force-flushed to Future AGI's collector, and confirmed visible in the Future AGI dashboard |
+| Future AGI evaluation and batch scenarios | Structurally implemented; the tracing no-op path is unit-tested, but `eval/run_*_futureagi.py` and the project-local `eval/simulation/` runner have not yet been executed end-to-end against a live Future AGI evaluation account |
 
 The core workflow is therefore live-validated with You.com. Serper.dev should
 still be treated as a tested integration candidate until its request shape,
 freshness behavior, quotas, and real cost have been checked with an account.
+Future AGI's tracing path has cleared that same bar. Its `evaluate()` metric
+identifiers and batch scenarios have not, and should be treated as integration
+candidates until they have been exercised against a live evaluation account.
 
 ---
 
@@ -471,6 +551,13 @@ A few choices became clearer during implementation:
 ### Known gaps
 
 - Serper.dev needs a live integration run and verified pricing.
+- Future AGI's `evaluate()` metric identifiers and the project-local batch
+  scenarios are implemented but not yet run end-to-end against a live
+  account (tracing alone has been).
+- Future AGI eval scores from `eval/run_*_futureagi.py` and
+  `eval/simulation/` are currently local-only: standalone `evaluate()` calls
+  are not attached to a trace/span, so they print to the terminal but do not
+  yet appear in the Future AGI dashboard.
 - Cost projection still uses estimates rather than actual model usage
   metadata.
 - Per-competitor progress could be clearer in the interface.
@@ -482,14 +569,23 @@ A few choices became clearer during implementation:
 ### Recommended next steps
 
 1. Live-test Serper.dev and replace its placeholder price.
-2. Record actual model usage and exact provider requests in the cost ledger.
-3. Add first-class progress events for each competitor branch.
-4. Run the LLM evaluation suite regularly and compare results over time.
-5. Pilot the workflow in several industries and review where coverage and
+2. Run `eval/run_discovery_eval_futureagi.py`,
+   `eval/run_analysis_eval_futureagi.py`, and
+   `eval/simulation/run_simulation.py` against a live Future AGI evaluation
+   account. Confirm that `faithfulness` and `answer_relevancy` remain the best
+   metric identifiers for the installed SDK version.
+3. If dashboard-visible eval scores are wanted (not just terminal output),
+   attach Future AGI eval calls to the run's trace/span instead of calling
+   `evaluate()` standalone.
+4. Record actual model usage and exact provider requests in the cost ledger.
+5. Add first-class progress events for each competitor branch.
+6. Run the LangSmith and Future AGI evaluation suites regularly, compare their
+   results over time, and require human review when the two judges disagree.
+7. Pilot the workflow in several industries and review where coverage and
    confidence disagree with a human analyst.
-6. Add authentication or deployment infrastructure only when a real hosting
+8. Add authentication or deployment infrastructure only when a real hosting
    requirement justifies it.
-7. Revisit A2A if an agent eventually becomes a separately deployed service or
+9. Revisit A2A if an agent eventually becomes a separately deployed service or
    a customer-controlled integration boundary.
 
 The MVP now completes the intended path from discovery to a cited briefing.
@@ -513,6 +609,7 @@ person has to correct it, and improve those parts before expanding the stack.
 - [Alembic documentation](https://alembic.sqlalchemy.org/)
 - [Pydantic documentation](https://docs.pydantic.dev/)
 - [LangSmith documentation](https://docs.smith.langchain.com/)
+- [Future AGI documentation](https://docs.futureagi.com/)
 - [ReportLab user guide](https://www.reportlab.com/docs/reportlab-userguide.pdf)
 - [pytest documentation](https://docs.pytest.org/)
 - [`uv` documentation](https://docs.astral.sh/uv/)

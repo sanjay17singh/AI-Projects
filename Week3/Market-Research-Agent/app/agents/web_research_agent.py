@@ -25,7 +25,7 @@ from app.schemas.research import (
     RawSearchResult,
     WebResearchResult,
 )
-from app.services import evidence_service
+from app.services import cost_service, evidence_service
 from app.utils.text_splitting import split_document
 
 RESULTS_PER_CATEGORY = 5
@@ -187,6 +187,14 @@ class WebResearchAgent:
                     warnings.append(f"embedding_storage_failed:{evidence_id}")
                     continue
                 evidence_service.update_embedding_status(db, evidence_id, "stored", chunk_count)
+                # Rough token estimate (chars/4) per chunk — same estimate-based
+                # approach as extraction cost until real embedding usage is
+                # exposed by the client; previously this provider/unit_type
+                # combination was never recorded at all.
+                estimated_tokens = chunk_count * (self._settings.chunk_size // 4)
+                cost_service.record_cost(
+                    db, run_id, "web_research_node", "openai", "embedding_tokens", estimated_tokens
+                )
 
             evidence_ids.append(str(evidence_id))
             categories_covered.add(category)
@@ -202,7 +210,11 @@ class WebResearchAgent:
         text: str,
     ) -> int:
         document = Document(page_content=text, metadata={"category": category})
-        chunks = split_document(document)
+        chunks = split_document(
+            document,
+            chunk_size=self._settings.chunk_size,
+            chunk_overlap=self._settings.chunk_overlap,
+        )
         if not chunks:
             return 0
 

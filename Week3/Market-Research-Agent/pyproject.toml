@@ -38,6 +38,14 @@ dev = [
     "responses>=0.25.3",
     "ruff>=0.7.4",
 ]
+# Optional: only needed for FUTUREAGI_ENABLED=true tracing and the
+# eval/*_futureagi.py / eval/simulation scripts. Not installed by a plain
+# `uv sync` — install explicitly with `uv sync --group futureagi`.
+futureagi = [
+    "fi-instrumentation-otel>=0.1.0",
+    "traceai-langchain>=0.1.0",
+    "ai-evaluation>=1.1.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

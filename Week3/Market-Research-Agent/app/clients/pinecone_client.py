@@ -3,6 +3,7 @@ in-memory fake implementing the same ensure_index/upsert/query interface."""
 
 from typing import Any
 
+from langsmith import traceable
 from pinecone import Pinecone, ServerlessSpec
 
 from app.config import Settings
@@ -29,15 +30,23 @@ class PineconeClient:
             self._index = self._pc.Index(self._settings.pinecone_index_name)
         return self._index
 
+    @traceable(run_type="tool", name="pinecone_upsert")
     def upsert(
         self, vectors: list[tuple[str, list[float], dict[str, Any]]], namespace: str
     ) -> None:
-        """vectors: list of (id, embedding, metadata) triples."""
+        """vectors: list of (id, embedding, metadata) triples.
+
+        @traceable is a graceful no-op when LangSmith tracing isn't enabled
+        (same no-op philosophy as init_tracing()/init_futureagi_tracing()) —
+        when it is enabled, this shows up as a child "tool" span under
+        whatever traced call (e.g. an eval run) invoked it, since Pinecone
+        calls aren't LangChain Runnables and wouldn't otherwise be traced."""
         payload = [
             {"id": vid, "values": values, "metadata": metadata} for vid, values, metadata in vectors
         ]
         self._index_handle().upsert(vectors=payload, namespace=namespace)
 
+    @traceable(run_type="tool", name="pinecone_query")
     def query(
         self,
         vector: list[float],

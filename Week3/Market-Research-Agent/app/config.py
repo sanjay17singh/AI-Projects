@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import true
 
 
 class Settings(BaseSettings):
@@ -42,6 +43,15 @@ class Settings(BaseSettings):
     langchain_api_key: str = ""
     langchain_project: str = "market-research-agent"
 
+    # Future AGI (optional) — a second, independent tracing/eval/simulation
+    # layer that runs alongside LangSmith, not instead of it. Explicit
+    # FUTUREAGI_ENABLED toggle, same reasoning as SERPER_ENABLED: turning it
+    # off must not require deleting the keys.
+    futureagi_enabled: bool = true
+    fi_api_key: str = ""
+    fi_secret_key: str = ""
+    fi_project_name: str = "market-research-agent"
+
     # App
     backend_base_url: str = "http://localhost:8000"
     app_env: str = "development"
@@ -51,6 +61,14 @@ class Settings(BaseSettings):
     max_retries_per_competitor: int = 2
     max_gap_retries: int = 3
     max_discovery_retries: int = 2
+
+    # Retrieval/extraction knobs — previously hardcoded module constants.
+    # Exposed here (same defaults as before) so an evaluation run can sweep
+    # them (e.g. top_k=5 vs top_k=8) without editing source.
+    retrieval_top_k: int = 6
+    extraction_temperature: float = 0.0
+    chunk_size: int = 1000
+    chunk_overlap: int = 150
 
     # Tests only
     test_database_url: str = ""

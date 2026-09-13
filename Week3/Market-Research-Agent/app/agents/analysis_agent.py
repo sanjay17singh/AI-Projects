@@ -14,8 +14,14 @@ from app.prompts.analysis_prompts import build_extraction_messages, build_retrie
 from app.schemas.analysis import ClaimField, CompetitorProfile, ExtractedProfile
 from app.schemas.common import ALL_PROFILE_CATEGORIES
 from app.schemas.research import storage_category_for
-from app.services.analysis_service import assemble_competitor_profile, sanitize_claims
+from app.services.analysis_service import (
+    assemble_competitor_profile,
+    sanitize_claims,
+    sanitize_red_flags,
+)
 
+# Fallback used only if Settings somehow lacks the field (e.g. an older
+# fixture/monkeypatch in a test) — kept in sync with Settings.retrieval_top_k.
 RETRIEVAL_TOP_K = 6
 
 
@@ -24,6 +30,11 @@ class AnalysisVerificationAgent:
         self._settings = settings
         self._pinecone = pinecone_client
         self._embeddings = get_embeddings_model(settings)
+        # Real token usage from the most recent _extract() call, keyed by
+        # "tokens_in"/"tokens_out". Populated on a best-effort basis (empty
+        # dict if the model response carried no usage_metadata, e.g. a fake
+        # in tests) — callers should fall back to estimates when empty.
+        self.last_usage: dict[str, int] = {}
 
     def _retrieve_category(
         self,
@@ -38,7 +49,7 @@ class AnalysisVerificationAgent:
         matches = self._pinecone.query(
             vector=vector,
             namespace=str(workspace_id),
-            top_k=RETRIEVAL_TOP_K,
+            top_k=getattr(self._settings, "retrieval_top_k", RETRIEVAL_TOP_K),
             filter={
                 "run_id": {"$eq": str(run_id)},
                 "competitor_id": {"$eq": str(competitor_id)},
@@ -77,28 +88,55 @@ class AnalysisVerificationAgent:
         for category in categories:
             claims: list[ClaimField] = getattr(extracted, category)
             setattr(extracted, category, sanitize_claims(claims, valid_evidence_ids))
+        extracted.red_flags = sanitize_red_flags(extracted.red_flags, valid_evidence_ids)
 
         return assemble_competitor_profile(str(competitor_id), competitor_name, extracted)
 
     def _extract(
         self, competitor_name: str, evidence_by_category: dict[str, list[dict]]
     ) -> ExtractedProfile:
-        model = get_chat_model(self._settings, fast=False).with_structured_output(ExtractedProfile)
+        # include_raw=True gives us the raw AIMessage alongside the parsed
+        # model, which is the only way to read real token usage
+        # (usage_metadata) for accurate cost tracking (see
+        # services/cost_service.record_cost callers in graphs/analysis_nodes.py).
+        # It also means a parsing failure comes back as parsed=None instead
+        # of a raised ValidationError, which is what the retry-then-fallback
+        # logic below checks for.
+        model = get_chat_model(self._settings, fast=False).with_structured_output(
+            ExtractedProfile, include_raw=True
+        )
         messages = build_extraction_messages(competitor_name, evidence_by_category)
+
+        profile = self._invoke_and_record_usage(model, messages)
+        if profile is not None:
+            return profile
+
+        # One stricter retry, per the product requirement, before falling
+        # back to an all-unsupported profile.
+        stricter = messages + [
+            (
+                "human",
+                "Your previous answer had a claim value without evidence_ids. Every "
+                "non-unsupported value must include at least one evidence_id from the "
+                "evidence shown above. Try again, following that rule exactly.",
+            )
+        ]
+        profile = self._invoke_and_record_usage(model, stricter)
+        if profile is not None:
+            return profile
+        return ExtractedProfile()
+
+    def _invoke_and_record_usage(self, model, messages) -> ExtractedProfile | None:
         try:
-            return model.invoke(messages)
+            result = model.invoke(messages)
         except ValidationError:
-            # One stricter retry, per the product requirement, before falling
-            # back to an all-unsupported profile.
-            stricter = messages + [
-                (
-                    "human",
-                    "Your previous answer had a claim value without evidence_ids. Every "
-                    "non-unsupported value must include at least one evidence_id from the "
-                    "evidence shown above. Try again, following that rule exactly.",
-                )
-            ]
-            try:
-                return model.invoke(stricter)
-            except ValidationError:
-                return ExtractedProfile()
+            return None
+
+        raw = result.get("raw") if isinstance(result, dict) else None
+        usage = getattr(raw, "usage_metadata", None) if raw is not None else None
+        if usage:
+            self.last_usage = {
+                "tokens_in": usage.get("input_tokens", 0) or 0,
+                "tokens_out": usage.get("output_tokens", 0) or 0,
+            }
+        return result.get("parsed") if isinstance(result, dict) else result

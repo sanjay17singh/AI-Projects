@@ -2,14 +2,23 @@
 calls an LLM — evidence_coverage_score in particular must stay a pure
 function of the data, since it drives graphs/edges.py's coverage-check edge."""
 
-from uuid import UUID
+from itertools import groupby
+from uuid import UUID, uuid4
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.db.models import AnalysisClaim
 from app.db.models import CompetitorProfile as CompetitorProfileRow
-from app.schemas.analysis import ClaimField, CompetitorProfile, ExtractedProfile, unsupported_claim
+from app.schemas.analysis import (
+    ClaimField,
+    CompetitorProfile,
+    Conflict,
+    ConflictingValue,
+    ExtractedProfile,
+    RedFlag,
+    unsupported_claim,
+)
 from app.schemas.common import ALL_PROFILE_CATEGORIES, COVERAGE_CATEGORIES, Confidence
 
 _CONFIDENCE_WEIGHT = {Confidence.HIGH: 3, Confidence.MEDIUM: 2, Confidence.LOW: 1}
@@ -29,6 +38,55 @@ def sanitize_claims(claims: list[ClaimField], valid_evidence_ids: set[str]) -> l
         else:
             sanitized.append(unsupported_claim())
     return sanitized or [unsupported_claim()]
+
+
+def sanitize_red_flags(red_flags: list[RedFlag], valid_evidence_ids: set[str]) -> list[RedFlag]:
+    """Same defensive purpose as sanitize_claims: a red flag citing an
+    evidence_id outside the retrieved set is dropped entirely rather than
+    kept with a hallucinated citation — there is no 'unsupported red flag'
+    placeholder, since an unsupported one simply shouldn't have been
+    reported (see rule 6 in analysis_prompts.EXTRACTION_SYSTEM_PROMPT)."""
+    sanitized: list[RedFlag] = []
+    for flag in red_flags:
+        if flag.evidence_ids and all(eid in valid_evidence_ids for eid in flag.evidence_ids):
+            if flag.red_flag_id is None:
+                flag = flag.model_copy(update={"red_flag_id": f"RF-{uuid4().hex[:12]}"})
+            sanitized.append(flag)
+    return sanitized
+
+
+def build_conflicts(profile: CompetitorProfile) -> list[Conflict]:
+    """Deterministic, Python-only aggregation of the `conflicting_group_id`
+    clusters the extraction LLM already produced (rule 4 in
+    analysis_prompts.EXTRACTION_SYSTEM_PROMPT) into one Conflict per group,
+    across every category. Never calls an LLM — resolution_status/
+    preferred_value/resolution_reason are copied from whatever the model set
+    on the group's members, not re-derived here."""
+    conflicts: list[Conflict] = []
+    for category in ALL_PROFILE_CATEGORIES:
+        claims = [c for c in getattr(profile, category) if c.conflicting_group_id]
+        claims.sort(key=lambda c: c.conflicting_group_id or "")
+        for _group_id, group_iter in groupby(claims, key=lambda c: c.conflicting_group_id):
+            group = list(group_iter)
+            resolution_status = next(
+                (c.resolution_status for c in group if c.resolution_status), "unresolved"
+            )
+            preferred = next((c for c in group if c.is_preferred), None)
+            resolution_reason = next(
+                (c.resolution_reason for c in group if c.resolution_reason), None
+            )
+            conflicts.append(
+                Conflict(
+                    field=category,
+                    values=[
+                        ConflictingValue(value=c.value, evidence_ids=c.evidence_ids) for c in group
+                    ],
+                    resolution_status=resolution_status,
+                    preferred_value=preferred.value if preferred else None,
+                    resolution_reason=resolution_reason,
+                )
+            )
+    return conflicts
 
 
 def compute_coverage_score(extracted: ExtractedProfile) -> float:
@@ -68,6 +126,7 @@ def assemble_competitor_profile(
         competitor_name=competitor_name,
         evidence_coverage_score=compute_coverage_score(extracted),
         overall_confidence=compute_overall_confidence(extracted),
+        red_flags=extracted.red_flags,
         **{category: getattr(extracted, category) for category in ALL_PROFILE_CATEGORIES},
     )
 

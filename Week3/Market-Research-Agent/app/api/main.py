@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.routers import briefing, discovery, health, research, selection
+from app.clients.futureagi_client import init_futureagi_tracing
 from app.clients.langsmith_client import init_tracing
 from app.clients.pinecone_client import PineconeClient
 from app.config import get_settings
@@ -20,6 +21,7 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level)
     init_tracing(settings)
+    init_futureagi_tracing(settings)
 
     session_factory = get_session_factory(settings)
     app.state.session_factory = session_factory

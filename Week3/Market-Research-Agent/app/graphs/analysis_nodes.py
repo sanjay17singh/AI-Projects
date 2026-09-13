@@ -20,11 +20,26 @@ def analysis_node(state: ResearchGraphState, deps: ResearchDeps) -> dict:
             competitor_name=competitor["name"],
         )
         persist_profile(db, run_id, competitor_id, profile)
+        # Prefer real token usage from the extraction call (last_usage is
+        # populated on a best-effort basis in AnalysisVerificationAgent._extract
+        # via include_raw=True); fall back to the rough per-category averages
+        # when a model/fake didn't report usage_metadata.
+        usage = getattr(deps.analysis_agent, "last_usage", {}) or {}
         cost_service.record_cost(
-            db, run_id, "analysis_node", "openai", "tokens_in", AVG_EXTRACTION_TOKENS_IN
+            db,
+            run_id,
+            "analysis_node",
+            "openai",
+            "tokens_in",
+            usage.get("tokens_in") or AVG_EXTRACTION_TOKENS_IN,
         )
         cost_service.record_cost(
-            db, run_id, "analysis_node", "openai", "tokens_out", AVG_EXTRACTION_TOKENS_OUT
+            db,
+            run_id,
+            "analysis_node",
+            "openai",
+            "tokens_out",
+            usage.get("tokens_out") or AVG_EXTRACTION_TOKENS_OUT,
         )
     finally:
         db.close()

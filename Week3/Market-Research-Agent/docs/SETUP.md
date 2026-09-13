@@ -18,6 +18,7 @@
 | Pinecone | Vector store for research evidence | app.pinecone.io — API Keys |
 | Serper.dev | Optional second web/news search provider (Web Research agent) | serper.dev — Dashboard → API Key |
 | LangSmith | Optional — dev tracing/eval; app runs fine without it | smith.langchain.com — Settings → API Keys |
+| Future AGI | Optional — second tracing/eval/simulation layer, runs alongside LangSmith | futureagi.com — Dashboard → API keys |
 
 The app **requires** real OpenAI/You.com/Pinecone keys to actually run —
 there is no mock/offline mode. Only the test suite (`tests/`) works without
@@ -56,6 +57,14 @@ Fill in `.env`:
   toggle is deliberately explicit and separate from just having a key
   configured — setting `SERPER_API_KEY` without `SERPER_ENABLED=true` leaves
   Serper off.
+- `FUTUREAGI_ENABLED` / `FI_API_KEY` / `FI_SECRET_KEY` / `FI_PROJECT_NAME` —
+  optional second observability/eval/simulation layer that runs **alongside**
+  LangSmith, not instead of it. Off by default. Turning it on additionally
+  requires installing its dependency group: `uv sync --group futureagi`
+  (these packages are not part of the default `uv sync`). See
+  `eval/README.md` for the separate `eval/*_futureagi.py` and
+  `eval/simulation/` scripts this enables — like the rest of `eval/`, they
+  require real credentials and never run automatically.
 
 ## 3. Local Postgres (no Docker)
 

@@ -6,9 +6,18 @@ DiscoveryAgent: SearchQueryList then CandidateList)."""
 from typing import Any
 
 
+class _FakeRawMessage:
+    """Stand-in for the AIMessage returned when include_raw=True. usage_metadata
+    is None by default (mirrors a fake with no real token accounting) —
+    production code reading it must tolerate that."""
+
+    usage_metadata: dict | None = None
+
+
 class _FakeStructuredRunnable:
-    def __init__(self, result: Any):
+    def __init__(self, result: Any, include_raw: bool = False):
         self._result = result
+        self.include_raw = include_raw
         self.call_count = 0
         self.last_messages = None
 
@@ -19,6 +28,10 @@ class _FakeStructuredRunnable:
         if isinstance(result, list):
             index = min(self.call_count - 1, len(result) - 1)
             result = result[index]
+        if self.include_raw:
+            if isinstance(result, BaseException):
+                return {"raw": _FakeRawMessage(), "parsed": None, "parsing_error": result}
+            return {"raw": _FakeRawMessage(), "parsed": result, "parsing_error": None}
         if isinstance(result, BaseException):
             raise result
         return result
@@ -31,12 +44,14 @@ class FakeChatModel:
         self._results_by_model = results_by_model or {}
         self.structured_runnables: dict[type, _FakeStructuredRunnable] = {}
 
-    def with_structured_output(self, model_cls: type) -> _FakeStructuredRunnable:
+    def with_structured_output(
+        self, model_cls: type, include_raw: bool = False
+    ) -> _FakeStructuredRunnable:
         # Memoized per model class so call_count accumulates correctly even
         # though real code calls get_chat_model(...).with_structured_output(X)
         # fresh on every node invocation (e.g. across retries).
         if model_cls not in self.structured_runnables:
             self.structured_runnables[model_cls] = _FakeStructuredRunnable(
-                self._results_by_model.get(model_cls)
+                self._results_by_model.get(model_cls), include_raw=include_raw
             )
         return self.structured_runnables[model_cls]

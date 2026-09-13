@@ -19,7 +19,9 @@ def test_no_evidence_falls_back_to_unsupported(settings, monkeypatch):
     )
     monkeypatch.setattr(
         "app.agents.analysis_agent.get_chat_model",
-        lambda settings, fast=False: FakeChatModel({ExtractedProfile: ExtractedProfile()}),
+        lambda settings, fast=False, temperature=0.0: FakeChatModel(
+            {ExtractedProfile: ExtractedProfile()}
+        ),
     )
 
     agent = AnalysisVerificationAgent(
